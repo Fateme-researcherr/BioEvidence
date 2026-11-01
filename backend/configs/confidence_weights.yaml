@@ -1,0 +1,21 @@
+evidence_type:
+  clinical_trial_result: 0.9
+  genetic_association: 0.8
+  functional_mechanistic: 0.7
+  target_disease_association_score: 0.6
+  review_meta_analysis: 0.5
+  case_report: 0.3
+study_design:
+  RCT: 1.0
+  observational: 0.6
+  preclinical_in_vivo: 0.5
+  preclinical_in_vitro: 0.4
+  case_series: 0.3
+  not_applicable: 0.5
+authority:
+  curated_database: 0.9
+  registered_trial_record: 0.9
+  peer_reviewed_primary: 0.8
+  peer_reviewed_secondary: 0.6
+  preprint: 0.4
+  database_aggregated_score: 0.7

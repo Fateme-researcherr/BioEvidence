@@ -1,0 +1,43 @@
+services:
+  api:
+    build: ./backend
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - NEO4J_URI=${NEO4J_URI}
+      - NEO4J_USER=${NEO4J_USER}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - NCBI_API_KEY=${NCBI_API_KEY}
+      - LLM_API_KEY=${LLM_API_KEY}
+    depends_on: [postgres, neo4j]
+    ports: ["8000:8000"]
+
+  worker:
+    build: ./backend
+    command: python -m orchestration.worker
+    depends_on: [postgres, neo4j]
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - NEO4J_URI=${NEO4J_URI}
+      - NEO4J_USER=${NEO4J_USER}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - NCBI_API_KEY=${NCBI_API_KEY}
+      - LLM_API_KEY=${LLM_API_KEY}
+
+  postgres:
+    image: postgres:16
+    volumes: [pgdata:/var/lib/postgresql/data]
+    environment:
+      - POSTGRES_DB=biomed_evidence
+      - POSTGRES_USER=app
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+
+  neo4j:
+    image: neo4j:5-community
+    volumes: [neo4jdata:/data]
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
+
+
+volumes:
+  pgdata:
+  neo4jdata:

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evidence Reasoning — Intelligence Brief</title>
+<style>
+  :root {
+    --ink: #10151b;
+    --panel: #f4ede0;
+    --panel-line: #d8cbb0;
+    --accent: #2f6f6a;
+    --accent-soft: #e4efed;
+    --conflict: #a6432f;
+    --text-body: #232a2f;
+    --text-muted: #6b6156;
+    --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+    --serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+    --sans: "IBM Plex Sans", "Inter", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--text-body);
+    font-family: var(--sans);
+    min-height: 100vh;
+  }
+
+  .shell {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 20px 96px;
+  }
+
+  header.masthead {
+    color: var(--panel);
+    margin-bottom: 32px;
+  }
+
+  header.masthead .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  header.masthead h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 34px;
+    line-height: 1.15;
+    margin: 0 0 8px;
+  }
+
+  header.masthead p {
+    color: #a9b0b6;
+    font-size: 15px;
+    margin: 0;
+    max-width: 52ch;
+  }
+
+  form.query-form {
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 4px;
+    padding: 24px;
+    display: grid;
+    gap: 16px;
+  }
+
+  .field label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .field input {
+    width: 100%;
+    padding: 10px 12px;
+    font-family: var(--sans);
+    font-size: 15px;
+    border: 1px solid var(--panel-line);
+    border-radius: 3px;
+    background: #fffdf9;
+    color: var(--text-body);
+  }
+
+  .field input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  button.submit {
+    justify-self: start;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 11px 22px;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  button.submit:disabled { opacity: 0.55; cursor: default; }
+  button.submit:hover:not(:disabled) { background: #285e59; }
+
+  #api-key-field { border-top: 1px dashed var(--panel-line); padding-top: 14px; }
+
+  .status-line {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: #a9b0b6;
+    margin-top: 18px;
+    min-height: 18px;
+  }
+
+  /* Intelligence Brief */
+  .brief {
+    margin-top: 40px;
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 4px;
+    padding: 28px;
+  }
+
+  .brief-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+    border-bottom: 1px solid var(--panel-line);
+    padding-bottom: 14px;
+    margin-bottom: 20px;
+  }
+
+  .brief-header h2 {
+    font-family: var(--serif);
+    font-size: 22px;
+    margin: 0;
+  }
+
+  .framework-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 4px 9px;
+    border-radius: 2px;
+  }
+
+  .framework-rationale {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0 0 24px;
+    font-style: italic;
+  }
+
+  .section {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--panel-line);
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section .claim {
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 0 0 12px;
+  }
+
+  .citation-link {
+    font-family: var(--mono);
+    font-size: 11px;
+    vertical-align: super;
+    color: var(--accent);
+    text-decoration: none;
+    background: var(--accent-soft);
+    padding: 1px 4px;
+    border-radius: 2px;
+    margin-left: 2px;
+    cursor: pointer;
+  }
+  .citation-link:hover { background: #cfe4e0; }
+
+  /* KG path viewer — the signature element: a lab requisition rail */
+  .path-rail {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+    margin: 14px 0;
+    padding: 10px 0;
+  }
+  .path-node {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: #fffdf9;
+    border: 1px solid var(--panel-line);
+    border-radius: 20px;
+    padding: 4px 10px;
+    white-space: nowrap;
+  }
+  .path-node.edge {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 0 4px;
+    font-style: italic;
+  }
+  .path-connector {
+    color: var(--panel-line);
+    font-size: 13px;
+    padding: 0 2px;
+  }
+
+  .evidence-trace {
+    margin-top: 10px;
+    display: grid;
+    gap: 6px;
+  }
+  .evidence-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+    padding: 7px 10px;
+    background: #fffdf9;
+    border: 1px solid var(--panel-line);
+    border-radius: 3px;
+  }
+  .evidence-row .src {
+    font-family: var(--mono);
+    color: var(--text-body);
+  }
+  .evidence-row .conf {
+    font-family: var(--mono);
+    color: var(--accent);
+  }
+  .evidence-row.conflicts .conf { color: var(--conflict); }
+
+  .gap-notice {
+    margin-top: 40px;
+    background: #2a1712;
+    border: 1px solid var(--conflict);
+    border-radius: 4px;
+    padding: 22px;
+    color: #f3d9d0;
+  }
+  .gap-notice h2 {
+    font-family: var(--serif);
+    margin: 0 0 8px;
+    font-size: 20px;
+  }
+  .gap-notice p { font-size: 14px; line-height: 1.5; margin: 0 0 10px; }
+  .gap-notice ul { margin: 0; padding-left: 18px; font-size: 13px; }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <header class="masthead">
+      <span class="eyebrow">Evidence Reasoning — Intelligence Brief</span>
+      <h1>Ask a disease/gene/therapy question</h1>
+      <p>Every claim below resolves back to a primary source identifier — nothing here is asserted without an evidence trace.</p>
+    </header>
+
+    <form class="query-form" id="query-form">
+      <div class="field">
+        <label for="disease">Disease</label>
+        <input id="disease" name="disease" type="text" placeholder="Rett syndrome" required>
+      </div>
+      <div class="field">
+        <label for="gene_target">Gene / target</label>
+        <input id="gene_target" name="gene_target" type="text" placeholder="MECP2" required>
+      </div>
+      <div class="field">
+        <label for="therapeutic_approach">Therapeutic approach</label>
+        <input id="therapeutic_approach" name="therapeutic_approach" type="text" placeholder="gene therapy" required>
+      </div>
+      <div class="field" id="api-key-field">
+        <label for="api_key">API key</label>
+        <input id="api_key" name="api_key" type="password" placeholder="X-API-Key" required>
+      </div>
+      <button class="submit" type="submit" id="submit-btn">Submit query</button>
+      <div class="status-line" id="status-line"></div>
+    </form>
+
+    <div id="results"></div>
+  </div>
+
+<script>
+const form = document.getElementById('query-form');
+const submitBtn = document.getElementById('submit-btn');
+const statusLine = document.getElementById('status-line');
+const resultsEl = document.getElementById('results');
+
+const POLL_INTERVAL_MS = 2000;
+const MAX_POLL_ATTEMPTS = 60;
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  resultsEl.innerHTML = '';
+  submitBtn.disabled = true;
+  statusLine.textContent = 'Submitting query...';
+
+  const apiKey = document.getElementById('api_key').value;
+  const payload = {
+    disease: document.getElementById('disease').value,
+    gene_target: document.getElementById('gene_target').value,
+    therapeutic_approach: document.getElementById('therapeutic_approach').value,
+  };
+
+  try {
+    const submitResponse = await fetch('/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+      body: JSON.stringify(payload),
+    });
+    if (!submitResponse.ok) {
+      throw new Error(`Submit failed: ${submitResponse.status}`);
+    }
+    const submitted = await submitResponse.json();
+    statusLine.textContent = `Job ${submitted.job_id} — pending...`;
+    await pollJob(submitted.job_id, apiKey);
+  } catch (err) {
+    statusLine.textContent = `Error: ${err.message}`;
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+async function pollJob(jobId, apiKey) {
+  for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+
+    const response = await fetch(`/query/${jobId}`, {
+      headers: { 'X-API-Key': apiKey },
+    });
+    if (!response.ok) {
+      statusLine.textContent = `Error polling job: ${response.status}`;
+      return;
+    }
+    const data = await response.json();
+
+    if (data.status === 'pending' || data.status === 'running') {
+      statusLine.textContent = `Job ${jobId} — ${data.status}...`;
+      continue;
+    }
+
+    statusLine.textContent = `Job ${jobId} — ${data.status}`;
+
+    if (data.status === 'complete' && data.result) {
+      renderBrief(data.result);
+    } else {
+      renderGapNotice(data);
+    }
+    return;
+  }
+  statusLine.textContent = `Job ${jobId} — timed out waiting for completion.`;
+}
+
+function renderBrief(brief) {
+  const container = document.createElement('div');
+  container.className = 'brief';
+
+  const header = document.createElement('div');
+  header.className = 'brief-header';
+  header.innerHTML = `
+    <h2>Intelligence Brief</h2>
+    <span class="framework-tag">${escapeHtml(brief.framework_selected || '')}</span>
+  `;
+  container.appendChild(header);
+
+  if (brief.framework_rationale) {
+    const rationale = document.createElement('p');
+    rationale.className = 'framework-rationale';
+    rationale.textContent = brief.framework_rationale;
+    container.appendChild(rationale);
+  }
+
+  (brief.report_sections || []).forEach((section) => {
+    container.appendChild(renderSection(section));
+  });
+
+  resultsEl.innerHTML = '';
+  resultsEl.appendChild(container);
+}
+
+function renderSection(section) {
+  const el = document.createElement('div');
+  el.className = 'section';
+
+  const claim = document.createElement('p');
+  claim.className = 'claim';
+  claim.appendChild(document.createTextNode(section.claim_or_hypothesis || ''));
+
+  (section.evidence_trace || []).forEach((evidence, i) => {
+    const sup = document.createElement('a');
+    sup.className = 'citation-link';
+    sup.textContent = `[${i + 1}]`;
+    sup.title = `${evidence.source_database} ${evidence.source_id}`;
+    sup.href = '#';
+    claim.appendChild(sup);
+  });
+  el.appendChild(claim);
+
+  if (section.reasoning_path && section.reasoning_path.length) {
+    el.appendChild(renderPathRail(section.reasoning_path));
+  }
+
+  if (section.evidence_trace && section.evidence_trace.length) {
+    const trace = document.createElement('div');
+    trace.className = 'evidence-trace';
+    section.evidence_trace.forEach((evidence, i) => {
+      const row = document.createElement('div');
+      row.className = 'evidence-row';
+      row.innerHTML = `
+        <span class="src">[${i + 1}] ${escapeHtml(evidence.source_database)} · ${escapeHtml(evidence.source_id)} · ${escapeHtml(evidence.primary_or_secondary)}</span>
+        <span class="conf">confidence ${Number(evidence.confidence_score).toFixed(2)}</span>
+      `;
+      trace.appendChild(row);
+    });
+    el.appendChild(trace);
+  }
+
+  return el;
+}
+
+function renderPathRail(reasoningPath) {
+  const rail = document.createElement('div');
+  rail.className = 'path-rail';
+  reasoningPath.forEach((step, i) => {
+    const isEdge = step.node_or_edge_type === step.node_or_edge_type.toUpperCase();
+    const node = document.createElement('span');
+    node.className = isEdge ? 'path-node edge' : 'path-node';
+    node.textContent = step.display_name || step.node_or_edge_type;
+    rail.appendChild(node);
+    if (i < reasoningPath.length - 1) {
+      const connector = document.createElement('span');
+      connector.className = 'path-connector';
+      connector.textContent = '→';
+      rail.appendChild(connector);
+    }
+  });
+  return rail;
+}
+
+function renderGapNotice(data) {
+  const el = document.createElement('div');
+  el.className = 'gap-notice';
+  el.innerHTML = `
+    <h2>Gap notice</h2>
+    <p>${escapeHtml(data.reason || 'The provenance requirement was not met for this query.')}</p>
+  `;
+  if (data.failed_sections && data.failed_sections.length) {
+    const ul = document.createElement('ul');
+    data.failed_sections.forEach((section) => {
+      const li = document.createElement('li');
+      li.textContent = section;
+      ul.appendChild(li);
+    });
+    el.appendChild(ul);
+  }
+  resultsEl.innerHTML = '';
+  resultsEl.appendChild(el);
+}
+
+function escapeHtml(value) {
+  const div = document.createElement('div');
+  div.textContent = value == null ? '' : String(value);
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>
